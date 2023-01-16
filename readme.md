@@ -6,3 +6,4 @@ When working on the project, make sure to
 - make sure all requirements are in `requirements.txt`
 - keep the code readable
 - follow what the previous dev did, but also add your creativity to it
+ 
