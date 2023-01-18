@@ -1,2 +1,4 @@
 discord.py
 python-dotenv
+git+https://github.com/gorialis/jishaku
+git+https://github.com/Rapptz/asqlite
