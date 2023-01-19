@@ -8,6 +8,10 @@ log = getLogger(__name__)
 
 @commands.Cog.listener()
 async def on_command_error(ctx: commands.Context, error: Exception):
+    """|coro|
+
+    Handles errors for the bot. Errors that are not handled here get logged to the console
+    """
     if isinstance(error, commands.CommandInvokeError):
         error = error.original
 
