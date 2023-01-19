@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from decimal import DefaultContext
 import sys
 import sqlite3
 from contextlib import asynccontextmanager
@@ -25,10 +24,10 @@ class Item:
 
 
 class Wallet:
-    def __init__(self, data: sqlite3.Row, inventory: DefaultDict[Item, int], bot: BotChallenge) -> None:
+    def __init__(self, data: sqlite3.Row, inventory: DefaultDict[int, int], bot: BotChallenge) -> None:
         self._bot = bot
         self.user_id = data['user_id']
-        self.inventory = inventory  # Dict[<item>: <amount of items>]
+        self.inventory = inventory  # Dict[<item id>: <amount of items>]
         self._balance = data['balance']
 
     @property
@@ -155,7 +154,7 @@ class BaseEconomyCog(commands.Cog):
         if wallet_info:
             items = await conn.fetchall('SELECT item_id, amount FROM inventory WHERE user_id = ?', (user.id,))
             dd = defaultdict(int)
-            dd.update({self.items[item_id]: amount for item_id, amount in items})
+            dd.update({item_id: amount for item_id, amount in items})
             wallet = Wallet(wallet_info, dd, self.bot)
             self._wallets[user.id] = wallet
             return wallet

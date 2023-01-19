@@ -22,7 +22,7 @@ class ItemStore(BaseEconomyCog):
         price = item.price * amount
         wallet = await self.get_wallet(ctx.author)
         await wallet.withdraw(price)
-        wallet.inventory[item] += 1
+        wallet.inventory[item.item_id] += 1
         async with self.bot.pool.acquire() as conn:
             await conn.execute(
                 'INSERT INTO inventory (user_id, item_id, amount) VALUES (:user_id, :item_id, :amount)'
@@ -30,7 +30,7 @@ class ItemStore(BaseEconomyCog):
                 {'user_id': ctx.author.id, 'item_id': item.item_id, 'amount': amount},
             )
             await conn.commit()
-        await ctx.send(f'You bough {amount} {item.name} for a total of {self.currency_name}{price}')
+        await ctx.send(f'You bough {amount} {item.name} for a total of {self.currency_symbol}{price}')
 
     @commands.command()
     async def sell(self, ctx: commands.Context, amount: Optional[int], *, item_name: str):
@@ -44,9 +44,9 @@ class ItemStore(BaseEconomyCog):
         if not item:
             raise commands.BadArgument('There is no item with that name.')
         wallet = await self.get_wallet(ctx.author)
-        if wallet.inventory[item] - amount < 1:
+        if wallet.inventory[item.item_id] - amount < 1:
             raise commands.BadArgument(f'You do not have that many of {item.name}')
-        wallet.inventory[item] -= amount
+        wallet.inventory[item.item_id] -= amount
         price = item.price * amount
         await wallet.add(price)
 
@@ -57,7 +57,7 @@ class ItemStore(BaseEconomyCog):
             )
             await conn.commit()
 
-        await ctx.send(f'You sold {amount} {item.name} and earned {self.currency_name}{price}')
+        await ctx.send(f'You sold {amount} {item.name} and earned {self.currency_symbol}{price}')
 
     @commands.command()
     async def store(self, ctx: commands.Context):
@@ -67,3 +67,5 @@ class ItemStore(BaseEconomyCog):
         embed = discord.Embed(title='Item Store', color=discord.Color.blurple(), description=f'```py\n{table}\n```')
         embed.set_footer(text='Buy items with `buy`.')
         await ctx.send(embed=embed)
+
+    # TODO: Command to list person's items.
