@@ -1,4 +1,5 @@
 discord.py
 python-dotenv
+tabulate
 git+https://github.com/gorialis/jishaku
 git+https://github.com/Rapptz/asqlite

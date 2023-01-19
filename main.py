@@ -26,7 +26,7 @@ class BotChallenge(commands.Bot):
         super().__init__(
             command_prefix=commands.when_mentioned_or(getenv('PREFIX')),
             intents=discord.Intents.all(),
-            description='6 devs made this bot together, what will happen? Dun dun dun...\n\nCommands:',
+            description='6 devs made this bot together, what will happen? Dun dun dun...',
         )
         self.pool = db
 

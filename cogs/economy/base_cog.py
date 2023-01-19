@@ -1,7 +1,10 @@
+from dataclasses import dataclass
+from decimal import DefaultContext
 import sys
 import sqlite3
 from contextlib import asynccontextmanager
-from typing import Optional, Dict
+from collections import defaultdict
+from typing import Optional, Dict, DefaultDict
 
 import asqlite
 import discord
@@ -10,25 +13,33 @@ from discord.ext import commands
 from main import BotChallenge
 
 
+@dataclass
+class Item:
+    item_id: int
+    name: str
+    price: int
+
+    @classmethod
+    def from_row(cls, row: sqlite3.Row):
+        return cls(item_id=int(row['item_id']), name=row['item_name'], price=int(row['price']))
+
+
 class Wallet:
-    def __init__(self, data: sqlite3.Row, bot: BotChallenge) -> None:
+    def __init__(self, data: sqlite3.Row, inventory: DefaultDict[Item, int], bot: BotChallenge) -> None:
         self._bot = bot
         self.user_id = data['user_id']
+        self.inventory = inventory  # Dict[<item>: <amount of items>]
         self._balance = data['balance']
 
     @property
     def balance(self):
         return self._balance
 
-    async def update_values(self):
-        async with self.managed_conn() as conn:
-            wallet_info = await conn.fetchone('SELECT * FROM wallets WHERE user_id = ?', (self.user_id,))
-        self.__init__(wallet_info, self._bot)
-
     @asynccontextmanager
     async def managed_conn(self, connection: Optional[asqlite.Connection] = None):
         """Async context manager that creates a connection
-        and manages it if no connection is passed to it.
+        and manages it if no connection is passed to it. It will
+        also commit automatically, if it's managing the connection.
         """
         context_manager = None
         try:
@@ -93,6 +104,13 @@ class BaseEconomyCog(commands.Cog):
         self.bot: BotChallenge = bot
         super().__init__()
         self._wallets: Dict[int, Wallet] = {}
+        self.items: Dict[int, Item] = {}
+
+    async def cog_load(self) -> None:
+        """Gets the items from the database, and stores it in self.items"""
+        async with self.bot.pool.acquire() as conn:
+            items = await conn.fetchall("SELECT * FROM items")
+            self.items = {r['item_id']: Item.from_row(r) for r in items}
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         """Check so that all commands have you entered in the database, but with a special case for start."""
@@ -135,7 +153,10 @@ class BaseEconomyCog(commands.Cog):
         async with self.bot.pool.acquire() as conn:
             wallet_info = await conn.fetchone('SELECT * FROM wallets WHERE user_id = ?', (user.id,))
         if wallet_info:
-            wallet = Wallet(wallet_info, self.bot)
+            items = await conn.fetchall('SELECT item_id, amount FROM inventory WHERE user_id = ?', (user.id,))
+            dd = defaultdict(int)
+            dd.update({self.items[item_id]: amount for item_id, amount in items})
+            wallet = Wallet(wallet_info, dd, self.bot)
             self._wallets[user.id] = wallet
             return wallet
         raise commands.BadArgument(f'Wallet not found.')

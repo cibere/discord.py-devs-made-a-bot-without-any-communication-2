@@ -1,3 +1,4 @@
+import random
 import discord
 from discord.ext import commands
 
@@ -5,7 +6,13 @@ from .base_cog import BaseEconomyCog
 
 
 class WalletManagement(BaseEconomyCog):
-    """Commands to manage, send, and receive money."""
+    """Commands to manage, send, and earn money. Games and other more complex things excluded."""
+
+    WORK_MESSAGES = [  # I need to add more... oh well don't have time!
+        'You did freelance work, and earned {}',
+        'You delivered a pizza, and got tipped {}',
+        'You worked and earned {}',
+    ]
 
     @commands.command()
     async def start(self, ctx: commands.Context):
@@ -28,4 +35,26 @@ class WalletManagement(BaseEconomyCog):
         your_wallet = await self.get_wallet(ctx.author)
         await your_wallet.withdraw(amount)
         await other_wallet.add(amount)
-        await ctx.send('Transfered money.')
+        await ctx.send(f"You gave them {amount} {self.currency_name}")
+
+    @commands.command()
+    @commands.cooldown(1, 5 * 60, commands.BucketType.user)
+    async def work(self, ctx: commands.Context):
+        """The simplest way to earn money.
+
+        This command can be ran once every 5 minutes."""
+        money = random.randint(10, 100)
+        wallet = await self.get_wallet(ctx.author)
+        await wallet.add(money)
+        await ctx.send(random.choice(self.WORK_MESSAGES).format(self.currency_symbol + str(money)))
+
+    @commands.command()
+    @commands.cooldown(1, 24 * 60 * 60, commands.BucketType.user)
+    async def daily(self, ctx: commands.Context):
+        """The simplest way to earn money.
+
+        This command can be ran once every day."""
+        money = random.randint(1000, 5000)
+        wallet = await self.get_wallet(ctx.author)
+        await wallet.add(money)
+        await ctx.send(f"Today, you earned {self.currency_symbol}{money}")

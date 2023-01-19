@@ -20,7 +20,7 @@ async def on_command_error(ctx: commands.Context, error: Exception):
     if isinstance(error, ignored):
         return log.debug(f'Ignoring error for {ctx.author}: {error}', exc_info=False)
 
-    if isinstance(error, (commands.UserInputError, commands.CheckFailure)):
+    if isinstance(error, (commands.UserInputError, commands.CheckFailure, commands.CommandOnCooldown)):
         return await ctx.send(str(error))
 
     await ctx.send('Something went wrong...')
