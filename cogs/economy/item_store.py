@@ -67,5 +67,3 @@ class ItemStore(BaseEconomyCog):
         embed = discord.Embed(title='Item Store', color=discord.Color.blurple(), description=f'```py\n{table}\n```')
         embed.set_footer(text='Buy items with `buy`.')
         await ctx.send(embed=embed)
-
-    # TODO: Command to list person's items.
