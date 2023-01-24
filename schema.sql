@@ -22,6 +22,18 @@ CREATE TABLE inventory (
     ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE lottery (
+  lot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  bal   INTEGER NOT NULL,
+  -- entries as list of user_ids
+  entries TEXT NULL,
+  winner INTEGER NULL,
+  start_time INTEGER NOT NULL,
+  end_time INTEGER NOT NULL,
+  FOREIGN KEY (winner) REFERENCES wallets(user_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 -- ITEMS -- Feel free to add more!
 INSERT INTO items(item_name, price) VALUES ('Rubber Duck', 1000);
 INSERT INTO items(item_name, price) VALUES ('Code Editor', 2300);
