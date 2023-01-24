@@ -34,6 +34,9 @@ class BotChallenge(commands.Bot):
         for ext in INITIAL_EXTENSIONS:
             await self.load_extension(ext)
 
+    async def on_ready(self) -> None:
+        print(f"Logged in as {self.user} (ID: {self.user.id})")
+
 
 async def runner():
     populated = os.path.exists('database.db')
