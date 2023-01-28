@@ -1,8 +1,8 @@
+import asyncio
 from typing import Optional
 
 import discord
 import tabulate
-import asyncio
 from discord.ext import commands
 
 from .base_cog import BaseEconomyCog, Item

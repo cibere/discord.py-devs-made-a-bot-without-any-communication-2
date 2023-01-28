@@ -1,16 +1,17 @@
-import discord
 import random
-from discord.ext import commands, tasks
 from datetime import datetime
+from logging import getLogger
+
+import discord
+from discord.ext import commands, tasks
 
 from .base_cog import BaseEconomyCog
+
+log = getLogger('BotChallenge.lottery')
 
 
 class Lottery(BaseEconomyCog):
     """All lottery related commands/tasks"""
-
-    async def cog_load(self):
-        self.lottery_check.start()
 
     @tasks.loop(minutes=1)
     async def lottery_check(self):
@@ -53,6 +54,7 @@ class Lottery(BaseEconomyCog):
             await conn.commit()
         # Send a message to the winner
         await winner.send(f'You won the lottery! You won {self.currency_symbol}{lottery["bal"]}')
+        log.info(f"Lottery ended. Winner: {winner} (ID: {winner.id})")
 
     # Create a lottery at random
     @tasks.loop(hours=1)
@@ -61,6 +63,8 @@ class Lottery(BaseEconomyCog):
         # 20% chance of a lottery starting
         if chance > 20:
             return
+
+        log.info("Starting a lottery")
 
         async with self.bot.pool.acquire() as conn:
             await conn.execute(
@@ -102,7 +106,7 @@ class Lottery(BaseEconomyCog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(alias=['startlottery'])
+    @commands.command(aliases=['startlottery'])
     @commands.is_owner()
     async def start_lottery(self, ctx: commands.Context, duration: int):
         """Start a lottery with a duration in minutes"""

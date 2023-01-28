@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-import sys
 import sqlite3
-from contextlib import asynccontextmanager
+import sys
 from collections import defaultdict
-from typing import Optional, Dict, DefaultDict
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from typing import DefaultDict, Dict, Optional
 
 import asqlite
 import discord
@@ -105,7 +105,7 @@ class BaseEconomyCog(commands.Cog):
         self._wallets: Dict[int, Wallet] = {}
         self.items: Dict[int, Item] = {}
 
-    async def cog_load(self) -> None:
+    async def get_items(self) -> None:
         """Gets the items from the database, and stores it in self.items"""
         async with self.bot.pool.acquire() as conn:
             items = await conn.fetchall("SELECT * FROM items")

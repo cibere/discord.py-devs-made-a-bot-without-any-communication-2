@@ -1,10 +1,19 @@
-import random
-import discord
 import asyncio
+import random
+from sqlite3 import Row
+
+import discord
 from discord.ext import commands
 
-from .base_cog import BaseEconomyCog
 from components import embeds
+
+from .base_cog import BaseEconomyCog
+
+
+class LeaderboardFlags(commands.FlagConverter, prefix='--', delimiter=' '):
+    guild: bool = commands.flag(
+        name='guild', default=False, description='Only shows the top people from the current guild', converter=bool
+    )
 
 
 class WalletManagement(BaseEconomyCog):
@@ -78,3 +87,41 @@ class WalletManagement(BaseEconomyCog):
         wallet = await self.get_wallet(ctx.author)
         await wallet.add(money)
         await ctx.send(f"Today, you earned {self.currency_symbol}{money}")
+
+    @commands.command(aliases=['lb'])
+    async def leaderboard(self, ctx: commands.Context, *, scope: LeaderboardFlags):
+        """Displays the leaderboard. The more money you have, the higher you are on the list.
+
+        You can pass a scope flag for a more specific leaderboard.
+        `guild` : only shows users from the current guild. Example: `--guild`
+        """
+
+        assert ctx.guild is not None
+        user_ids_current_guild = [user.id for user in ctx.guild.members]
+
+        if scope.guild is False:
+            async with self.bot.pool.acquire() as conn:
+                raw_users = await conn.fetchall('SELECT * FROM wallets')
+                await conn.commit()
+        else:
+            async with self.bot.pool.acquire() as conn:
+                raw_users = await conn.fetchall('SELECT * FROM wallets WHERE user_id in $1', (user_ids_current_guild))
+                await conn.commit()
+
+        def key(row: Row) -> int:
+            return row['balance']
+
+        raw_users.sort(key=key, reverse=True)
+
+        table: list[str] = []
+
+        for index, row in enumerate(raw_users):
+            user = self.bot.get_user(row['user_id'])
+            if not user:
+                user = await self.bot.fetch_user(row['user_id'])
+
+            table.append(f"{index + 1}) {self.currency_symbol}{row['balance']} - {f'{user} (ID: {user.id})'}")
+
+        em = discord.Embed(description='\n'.join(table), title='Leaderboard')
+        em.set_footer(text=f"Scope: {'guild' if scope.guild else 'global'}")
+        await ctx.send(embed=em)

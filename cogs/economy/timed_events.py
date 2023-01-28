@@ -1,7 +1,11 @@
 import random
+from logging import getLogger
+
 from discord.ext import tasks
 
 from .base_cog import BaseEconomyCog
+
+log = getLogger('BotChallenge.timed_events')
 
 
 class TimedEvents(BaseEconomyCog):
@@ -42,6 +46,8 @@ class TimedEvents(BaseEconomyCog):
         # Send message
         channel = await self.bot.fetch_user(wallet.user_id)
         await channel.send(f'You were robbed! You lost {self.currency_symbol}{amount}')
+
+        log.info(f"{channel} (ID: {channel.id}) has been robbed")
 
     @robbery.before_loop
     async def before_robbery(self):

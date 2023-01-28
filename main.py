@@ -1,12 +1,11 @@
-import os
 import asyncio
+import os
 from logging import getLogger
 
-import discord
-from dotenv import load_dotenv
-from discord.ext import commands
-
 import asqlite
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
 
 load_dotenv()
 log = getLogger('BotChallenge.main')
@@ -22,6 +21,8 @@ def getenv(key: str) -> str:
 
 
 class BotChallenge(commands.Bot):
+    user: discord.ClientUser
+
     def __init__(self, db: asqlite.Pool) -> None:
         super().__init__(
             command_prefix=commands.when_mentioned_or(getenv('PREFIX')),
