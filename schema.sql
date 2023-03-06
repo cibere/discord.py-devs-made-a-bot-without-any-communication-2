@@ -13,7 +13,7 @@ CREATE TABLE items (
   price     INT     NOT NULL
 );
 
-CREATE TABLE inventory ( 
+CREATE TABLE inventory (
   user_id INTEGER NOT NULL,
   item_id INTEGER NOT NULL,
   amount  INTEGER NOT NULL,
@@ -35,14 +35,18 @@ CREATE TABLE lottery (
 );
 
 -- ITEMS -- Feel free to add more!
-INSERT INTO items(item_name, price) VALUES ('Rubber Duck', 1000);
-INSERT INTO items(item_name, price) VALUES ('Code Editor', 2300);
-INSERT INTO items(item_name, price) VALUES ('Candy', 200);
-INSERT INTO items(item_name, price) VALUES ('Trampoline', 15000);
-INSERT INTO items(item_name, price) VALUES ('Emoji', 50);
-INSERT INTO items(item_name, price) VALUES ('Computer', 100);
-INSERT INTO items(item_name, price) VALUES ('Nuke', 999999999999999999);
-INSERT INTO items(item_name, price) VALUES ('Personal Robot', 1000);
-INSERT INTO items(item_name, price) VALUES ('Rock', 5);
-INSERT INTO items(item_name, price) VALUES ('Air', 1);
-INSERT INTO items(item_name, price) VALUES ('Nothing', 10);
+-- I had to simplify this, sorry
+INSERT INTO items
+  (item_name, price)
+VALUES
+  ('Rubber Duck', 1000),
+  ('Code Editor', 2300),
+  ('Candy', 200),
+  ('Trampoline', 15000),
+  ('Emoji', 50),
+  ('Computer', 100),
+  ('Nuke', 999999999999999999),
+  ('Personal Robot', 1000),
+  ('Rock', 5),
+  ('Air', 1),
+  ('Nothing', 10);
